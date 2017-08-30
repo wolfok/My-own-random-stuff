@@ -1,9 +1,16 @@
 import datetime
+import time
 import threading
+from urllib.request import urlopen
+import ssl
+import json
+
+# This restores the same behavior as before.
+context = ssl._create_unverified_context()
 
 #Check Today's date
 today = datetime.date(2017, 2, 24) #datetime.date.today()
-
+sunset_api_url = 'https://api.sunrise-sunset.org/json?lat=36.7201600&lng=-4.4203400&date=today'
 
 #-------------- Start Special Dates --------------
 
@@ -46,5 +53,24 @@ def printit():
 		print ('It is Farkas Birth day! Happy Birth day Farkas!')
 	else:
 		print('Its not a special day :(')
-printit()
+#printit()
 #------------ End Checking if There is a Certain Special Day ------------
+
+def load_api():
+	response = urlopen(sunset_api_url, context=context).read().decode('utf8')
+	obj = json.loads(response)
+	success = True
+	sunrise_time = time.strptime(str(obj['results']['sunrise']), '%I:%M:%S %p')
+	sunset_time = time.strptime(str(obj['results']['sunset']), '%I:%M:%S %p')
+	current_time = time.strptime(time.strftime('%I:%M:%S %p',time.localtime()),'%I:%M:%S %p')
+	
+	print('The sun will rise at: ' + time.strftime('%I:%M:%S %p',sunrise_time))
+	print('The sun will set at: ' + time.strftime('%I:%M:%S %p',sunset_time))
+	print('Currently it is: ' + time.strftime('%I:%M:%S %p',time.localtime()))
+	
+	if sunrise_time <= current_time <= sunset_time:
+		print("It's daylight")
+	else:
+		print("It's night time")
+
+load_api()
