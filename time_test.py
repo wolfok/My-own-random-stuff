@@ -4,13 +4,23 @@ import threading
 from urllib.request import urlopen
 import ssl
 import json
+#---------- Import files ------------
+import suncalc
 
 # This restores the same behavior as before.
 context = ssl._create_unverified_context()
 
 #Check Today's date
-today = datetime.date(2017, 2, 24) #datetime.date.today()
-sunset_api_url = 'https://api.sunrise-sunset.org/json?lat=36.7201600&lng=-4.4203400&date=today'
+today =  datetime.date.today() #datetime.date(2017, 2, 24)
+# sunset_api_url = 'https://api.sunrise-sunset.org/json?lat=47.4979&lng=19.0402&date=today'
+
+#Getting Sunset and Sunrise y geographical location
+location_lat = 47.4979
+location_long = 19.0402
+sunTime = suncalc.getTimes(today + datetime.timedelta(days=1), location_lat, location_long)
+sunRIseTime = suncalc.getSunrise(today + datetime.timedelta(days=1), location_lat, location_long)
+print('Mit kap a progi?:' + str(today))
+print('Mikor kel fel a nap?:' + str(sunRIseTime))
 
 #-------------- Start Special Dates --------------
 
@@ -38,7 +48,7 @@ adri_birthday = datetime.date(today.year, 2, 24)
 
 #------------ Start Checking if There is a Certain Special Day ------------
 def printit():
-	threading.Timer(1.0, printit).start() #Checkin the dates every x second
+	threading.Timer(5.0, printit).start() #Checkin the dates every x second
 	if christmas_start <= today <= christmas_end:
 		print('Yeah! Its Christmas!')
 	elif st_istvan_day == today:
@@ -53,24 +63,25 @@ def printit():
 		print ('It is Farkas Birth day! Happy Birth day Farkas!')
 	else:
 		print('Its not a special day :(')
-#printit()
+
+	def checkSunStatus():
+		sunrise_time = time.strptime(str(sunTime['sunrise']), '%Y-%m-%d %H:%M:%S')
+		sunset_time = time.strptime(str(sunTime['night']), '%Y-%m-%d %H:%M:%S')
+		current_time = time.strptime(time.strftime('%Y-%m-%d %H:%M:%S',time.localtime()),'%Y-%m-%d %H:%M:%S')
+	
+		print('The sun will rise at: ' + time.strftime('%Y-%m-%d %H:%M:%S',sunrise_time))
+		print('The sun will set at: ' + time.strftime('%Y-%m-%d %H:%M:%S',sunset_time))
+		print('Currently it is: ' + time.strftime('%Y-%m-%d %H:%M:%S',time.localtime()))
+	
+		if sunrise_time <= current_time <= sunset_time:
+			print("It's daylight")
+		else:
+			print("It's night time")
+
+	checkSunStatus()
+
+	
+	print('Ez most műkszik?: ' + str(sunTime))
+printit()
 #------------ End Checking if There is a Certain Special Day ------------
 
-def load_api():
-	response = urlopen(sunset_api_url, context=context).read().decode('utf8')
-	obj = json.loads(response)
-	success = True
-	sunrise_time = time.strptime(str(obj['results']['sunrise']), '%I:%M:%S %p')
-	sunset_time = time.strptime(str(obj['results']['sunset']), '%I:%M:%S %p')
-	current_time = time.strptime(time.strftime('%I:%M:%S %p',time.localtime()),'%I:%M:%S %p')
-	
-	print('The sun will rise at: ' + time.strftime('%I:%M:%S %p',sunrise_time))
-	print('The sun will set at: ' + time.strftime('%I:%M:%S %p',sunset_time))
-	print('Currently it is: ' + time.strftime('%I:%M:%S %p',time.localtime()))
-	
-	if sunrise_time <= current_time <= sunset_time:
-		print("It's daylight")
-	else:
-		print("It's night time")
-
-load_api()
