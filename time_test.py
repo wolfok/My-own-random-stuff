@@ -7,16 +7,11 @@ sys.path.append('/usr/local/lib/python3.6/site-packages')
 import datetime
 import time
 import threading
-from urllib.request import urlopen
-import ssl
-import json
 from pytz import timezone
 
 #---------- Import from files ------------
 import suncalc
 
-# This restores the same behavior as before.
-context = ssl._create_unverified_context()
 
 #Check Today's date
 today = datetime.date.today()
