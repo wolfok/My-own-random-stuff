@@ -1,26 +1,34 @@
+import sys
+
+#Giving default system path for librarys. It should be set up on a system level if possible. 
+sys.path.append('/usr/local/lib/python3.6/site-packages')
+
+
 import datetime
 import time
 import threading
 from urllib.request import urlopen
 import ssl
 import json
-#---------- Import files ------------
+from pytz import timezone
+
+#---------- Import from files ------------
 import suncalc
 
 # This restores the same behavior as before.
 context = ssl._create_unverified_context()
 
 #Check Today's date
-today =  datetime.date.today() #datetime.date(2017, 2, 24)
-# sunset_api_url = 'https://api.sunrise-sunset.org/json?lat=47.4979&lng=19.0402&date=today'
+today = datetime.date.today()
+#Translate today's datetime to UTC. It is needed for suncalc. I am using the 'PYTZ' library for it.
+today_UTC = datetime.datetime(today.year,today.month,today.day, tzinfo = timezone('UTC')) 
+
 
 #Getting Sunset and Sunrise y geographical location
 location_lat = 47.4979
 location_long = 19.0402
-sunTime = suncalc.getTimes(today + datetime.timedelta(days=1), location_lat, location_long)
-sunRIseTime = suncalc.getSunrise(today + datetime.timedelta(days=1), location_lat, location_long)
-print('Mit kap a progi?:' + str(today))
-print('Mikor kel fel a nap?:' + str(sunRIseTime))
+sunTime = suncalc.getTimes(today_UTC, location_lat, location_long)
+
 
 #-------------- Start Special Dates --------------
 
@@ -69,19 +77,23 @@ def printit():
 		sunset_time = time.strptime(str(sunTime['night']), '%Y-%m-%d %H:%M:%S')
 		current_time = time.strptime(time.strftime('%Y-%m-%d %H:%M:%S',time.localtime()),'%Y-%m-%d %H:%M:%S')
 	
-		print('The sun will rise at: ' + time.strftime('%Y-%m-%d %H:%M:%S',sunrise_time))
-		print('The sun will set at: ' + time.strftime('%Y-%m-%d %H:%M:%S',sunset_time))
+		#print('The sun will rise at: ' + time.strftime('%Y-%m-%d %H:%M:%S',sunrise_time))
+		#print('The sun will set at: ' + time.strftime('%Y-%m-%d %H:%M:%S',sunset_time))
 		print('Currently it is: ' + time.strftime('%Y-%m-%d %H:%M:%S',time.localtime()))
-	
+		
+		#Checking if it is daylight. If it is night time. The leds should not turn on, so you could sleep like a baby.
 		if sunrise_time <= current_time <= sunset_time:
-			print("It's daylight")
+			print("""It's daylight
+				-------------------------------
+				""")
 		else:
-			print("It's night time")
+			print("""It's nightime
+				-------------------------------
+				""")
+		#End daylight check
 
 	checkSunStatus()
 
-	
-	print('Ez most műkszik?: ' + str(sunTime))
 printit()
 #------------ End Checking if There is a Certain Special Day ------------
 

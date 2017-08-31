@@ -66,7 +66,7 @@ def hourAngle(h, phi, d):
 		return ret
 	except ValueError as e:
 		print(h, phi, d)
-		print (e)
+		print(e)
 
 def solarMeanAnomaly(d):
 	return rad * (357.5291 + 0.98560028 * d)
